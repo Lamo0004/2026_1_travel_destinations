@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, session, redirect
 import x
 import uuid
 import time
+from datetime import datetime
 from flask_session import Session
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
@@ -23,6 +24,10 @@ Session(app)
 #         raise Exception("not_logged_in")
 #     return user
 
+############################## 
+@app.template_filter('timestamp_to_date')
+def timestamp_to_date(ts):
+    return datetime.utcfromtimestamp(int(ts)).strftime('%Y-%m-%d')
 
 ##############################
 @app.get("/signup")
@@ -237,28 +242,39 @@ def show_create_destination():
 @app.post("/api-create-destination")
 def api_create_destination():
     try:
-
-        destination_title = request.form.get("destination_title")
-        destination_description = request.form.get("destination_description")
-        destination_country = request.form.get("destination_country")
-        destination_location = request.form.get("destination_location")
-        destination_date_from = request.form.get("destination_date_from")
-        destination_date_to = request.form.get("destination_date_to")
-
+        # Hent data fra formular
+        destination_title = request.form.get("title", "").strip()
+        destination_description = request.form.get("description", "").strip()
+        destination_country = request.form.get("country", "").strip()
+        destination_location = request.form.get("location", "").strip()
+        date_from_str = request.form.get("date_from", "").strip()
+        date_to_str = request.form.get("date_to", "").strip()
         destination_created_at = int(time.time())
+
+        # Tjek at alle påkrævede felter er udfyldt
+        if not destination_title or not destination_country or not date_from_str or not date_to_str:
+            return "Missing required fields", 400
+
+        # Konverter dato til epoch timestamp
+        destination_date_from = int(datetime.strptime(date_from_str, "%Y-%m-%d").timestamp())
+        destination_date_to = int(datetime.strptime(date_to_str, "%Y-%m-%d").timestamp())
+
+        # Check at date_from ikke er efter date_to
+        if destination_date_from > destination_date_to:
+            return "Start date cannot be after end date", 400
 
         db, cursor = x.db()
 
         q = """
         INSERT INTO destinations (
-        title,
-        description,
-        country,
-        location,
-        date_from,
-        date_to,
-        created_at
-        )
+            destination_title,
+            destination_description,
+            destination_country,
+            destination_location,
+            destination_date_from,
+            destination_date_to,
+            destination_created_at
+        ) 
         VALUES (%s,%s,%s,%s,%s,%s,%s)
         """
 
@@ -274,7 +290,7 @@ def api_create_destination():
 
         db.commit()
 
-        return f"""<browser mix-redirect="/destinations"></browser>"""
+        return redirect("/destinations")
 
     except Exception as ex:
         ic(ex)
@@ -289,17 +305,86 @@ def api_create_destination():
 @app.delete("/api/destinations/<destination_pk>")
 def delete_destination(destination_pk):
     try:
-
-        require_login()
+        # require_login()
 
         db, cursor = x.db()
-
-        q = "DELETE FROM destinations WHERE pk = %s"
+        q = "DELETE FROM destinations WHERE destination_pk = %s"
         cursor.execute(q, (destination_pk,))
-
         db.commit()
 
         return "", 204
+
+    except Exception as ex:
+        ic(ex)
+        return "System error", 500
+
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+    
+##############################
+@app.get("/edit-destination/<destination_pk>")
+def show_edit_destination(destination_pk):
+    try:
+        db, cursor = x.db()
+        q = "SELECT * FROM destinations WHERE destination_pk = %s"
+        cursor.execute(q, (destination_pk,))
+        destination = cursor.fetchone()
+
+        if not destination:
+            return "Destination not found", 404
+
+        return render_template("page_create.html", destination=destination, edit=True)
+    except Exception as ex:
+        ic(ex)
+        return "System error", 500
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+
+##############################
+@app.post("/api-update-destination/<destination_pk>")
+def api_update_destination(destination_pk):
+    try:
+        # Hent data fra formular
+        title = request.form.get("title", "").strip()
+        description = request.form.get("description", "").strip()
+        country = request.form.get("country", "").strip()
+        location = request.form.get("location", "").strip()
+        date_from_str = request.form.get("date_from", "").strip()
+        date_to_str = request.form.get("date_to", "").strip()
+
+        # Tjek at alle påkrævede felter er udfyldt
+        if not title or not country or not date_from_str or not date_to_str:
+            return "Missing required fields", 400
+
+        # Konverter dato til epoch timestamp
+        date_from = int(datetime.strptime(date_from_str, "%Y-%m-%d").timestamp())
+        date_to = int(datetime.strptime(date_to_str, "%Y-%m-%d").timestamp())
+
+        # Check at date_from ikke er efter date_to
+        if date_from > date_to:
+            return "Start date cannot be after end date", 400
+
+        db, cursor = x.db()
+
+        q = """
+        UPDATE destinations SET
+            destination_title=%s,
+            destination_description=%s,
+            destination_country=%s,
+            destination_location=%s,
+            destination_date_from=%s,
+            destination_date_to=%s
+        WHERE destination_pk=%s
+        """
+
+        cursor.execute(q, (title, description, country, location, date_from, date_to, destination_pk))
+        db.commit()
+
+        return redirect("/destinations")
 
     except Exception as ex:
         ic(ex)
