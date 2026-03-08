@@ -1,0 +1,37 @@
+{% include "_header.html" %}
+
+<main>
+    <h1 id="h1">Travel Destinations</h1>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis, accusamus ea? Vel modi laudantium facilis!
+        Totam dignissimos, ducimus fuga amet animi facere repellat nam odio, earum repudiandae nostrum saepe minus?
+        Incidunt aut voluptate quasi recusandae nostrum non, libero esse vero sunt sequi facilis nobis veritatis.
+        Tempore nemo odit in nisi quam! Perferendis minus blanditiis ex, quaerat voluptates voluptatem quis molestias.
+    </p>
+
+    <div id="destinationsContainer"></div>
+
+    <template id="destinationCardTemplate">
+        <div class="destination">
+
+            <p id="title"></p>
+            <p id="description"></p>
+            <p id="destination"></p>
+            <p id="date"></p>
+
+            <button class="deleteBtn">
+                Delete
+            </button>
+
+            <a class="editLink">
+                Edit
+            </a>
+
+        </div>
+    </template>
+
+
+
+    <script type="module" src="/static/dist/script.js"></script>
+</main>
+
+{% include "_footer.html" %}
