@@ -232,7 +232,7 @@ def api_get_destinations():
 @app.get("/api-create-destination")
 def show_create_destination():
     try:
-        return render_template("page_create.html")
+        return render_template("page_create.html", x=x)
     except Exception as ex:
         ic(ex)
         return "ups"
@@ -242,22 +242,23 @@ def show_create_destination():
 @app.post("/api-create-destination")
 def api_create_destination():
     try:
-        # Hent data fra formular
-        destination_title = request.form.get("title", "").strip()
+        destination_pk = uuid.uuid4().hex
+        destination_title = x.validate_destination_title()
         destination_description = request.form.get("description", "").strip()
-        destination_country = request.form.get("country", "").strip()
+        destination_country = x.validate_destination_country()
         destination_location = request.form.get("location", "").strip()
         date_from_str = request.form.get("date_from", "").strip()
         date_to_str = request.form.get("date_to", "").strip()
         destination_created_at = int(time.time())
+        
+        destination_date_from = None
+        destination_date_to = None
 
-        # Tjek at alle påkrævede felter er udfyldt
-        if not destination_title or not destination_country or not date_from_str or not date_to_str:
-            return "Missing required fields", 400
-
-        # Konverter dato til epoch timestamp
-        destination_date_from = int(datetime.strptime(date_from_str, "%Y-%m-%d").timestamp())
-        destination_date_to = int(datetime.strptime(date_to_str, "%Y-%m-%d").timestamp())
+        if date_from_str:
+            destination_date_from = int(datetime.strptime(date_from_str, "%Y-%m-%d").timestamp())
+        
+        if date_to_str:
+            destination_date_to = int(datetime.strptime(date_to_str, "%Y-%m-%d").timestamp())
 
         # Check at date_from ikke er efter date_to
         if destination_date_from > destination_date_to:
@@ -267,6 +268,7 @@ def api_create_destination():
 
         q = """
         INSERT INTO destinations (
+            destination_pk,
             destination_title,
             destination_description,
             destination_country,
@@ -275,10 +277,11 @@ def api_create_destination():
             destination_date_to,
             destination_created_at
         ) 
-        VALUES (%s,%s,%s,%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
         """
 
         cursor.execute(q, (
+            destination_pk,
             destination_title,
             destination_description,
             destination_country,
@@ -290,11 +293,25 @@ def api_create_destination():
 
         db.commit()
 
-        return redirect("/destinations")
+        return '<browser mix-redirect="/destinations"></browser>'
 
     except Exception as ex:
         ic(ex)
-        return "System error", 500
+
+        if "company_exception destination_title" in str(ex):
+            error_message = f"Destination title must be {x.DESTINATION_TITLE_MIN} to {x.DESTINATION_TITLE_MAX} characters"
+            ___tip = render_template("___tip.html", status="error",  message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+        
+        if "company_exception destination_country" in str(ex):
+            error_message = f"Country must be {x.DESTINATION_COUNTRY_MIN} to {x.DESTINATION_COUNTRY_MAX} characters"
+            ___tip = render_template("___tip.html", status="error",  message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+        
+        # Worst case
+        error_message = "System under maintenance"
+        ___tip = render_template("___tip.html", status="error",  message=error_message)
+        return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 500
 
     finally:
         if "cursor" in locals(): cursor.close()
@@ -335,7 +352,8 @@ def show_edit_destination(destination_pk):
         if not destination:
             return "Destination not found", 404
 
-        return render_template("page_create.html", destination=destination, edit=True)
+        return render_template("page_create.html", destination=destination, edit=True, x=x)
+        return '<browser mix-redirect="/destinations"></browser>'
     except Exception as ex:
         ic(ex)
         return "System error", 500
@@ -383,6 +401,13 @@ def api_update_destination(destination_pk):
 
         cursor.execute(q, (title, description, country, location, date_from, date_to, destination_pk))
         db.commit()
+
+        form_create = render_template("___form_create.html", x=x)
+
+        return f"""
+        <browser mix-replace="form">{form_create}</browser> 
+        <browser mix-redirect="/destinations"></browser>
+        """
 
         return redirect("/destinations")
 

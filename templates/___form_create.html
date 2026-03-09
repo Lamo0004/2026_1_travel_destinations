@@ -1,0 +1,47 @@
+<form
+    mix-post="{% if edit %}/api-update-destination/{{ destination.destination_pk }}{% else %}/api-create-destination{% endif %}"
+    autocomplete="off">
+
+    <div>
+        <label>Destination title <span>{{x.DESTINATION_TITLE_MIN}} to {{x.DESTINATION_TITLE_MAX}}
+                characters</span></label>
+        <input name="title" placeholder="title" type="text" value="{{ destination.destination_title if edit }}"
+            mix-validate="{{x.REGEX_DESTINATION_TITLE}}">
+    </div>
+
+    <div>
+        <label>Destination description</label>
+        <textarea name="description" placeholder="description"
+            type="text">{{ destination.destination_description if edit }}</textarea>
+    </div>
+
+    <div>
+        <label>Country <span>{{x.DESTINATION_COUNTRY_MIN}} to {{x.DESTINATION_COUNTRY_MAX}}
+                characters</span></label>
+        <input name="country" placeholder="country" type="text" value="{{ destination.destination_country if edit }}"
+            mix-validate="{{x.REGEX_DESTINATION_COUNTRY}}">
+    </div>
+
+    <div>
+        <label>Location</label>
+        <input name="location" placeholder="location" type="text"
+            value="{{ destination.destination_location if edit }}">
+    </div>
+
+    <div>
+        <label>Date from</label>
+        <input name="date_from" type="date"
+            value="{% if edit %}{{ destination.destination_date_from | int | timestamp_to_date }}{% endif %}">
+    </div>
+
+    <div>
+        <label>Date to</label>
+        <input name="date_to" type="date"
+            value="{% if edit %}{{ destination.destination_date_to | int | timestamp_to_date }}{% endif %}">
+    </div>
+
+    <button type="submit">
+        {% if edit %}Update destination{% else %}Create destination{% endif %}
+    </button>
+
+</form>

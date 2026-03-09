@@ -78,47 +78,25 @@ def validate_user_password():
 
 
 ################ Validation title ################ 
-# DESTINATION_TITLE_MIN = 2
-# DESTINATION_TITLE_MAX = 35
-# REGEX_DESTINATION_TITLE = f"^.{{{DESTINATION_TITLE_MIN},{DESTINATION_TITLE_MAX}}}$"
-# def validate_destination_title():
-#     destination_title = request.form.get("title", "").strip()
-#     if not re.match(REGEX_DESTINATION_TITLE, destination_title):
-#         raise Exception("company_exception destination_title")
-#     return destination_title
-
-
-################ Validation description ################ 
-# DESTINATION_DESCRIPTION_MIN = 5
-# DESTINATION_DESCRIPTION_MAX = 500
-# REGEX_DESTINATION_DESCRIPTION = f"^.{{{DESTINATION_DESCRIPTION_MIN},{DESTINATION_DESCRIPTION_MAX}}}$"
-# def validate_destination_description():
-#     destination_description = request.form.get("description", "").strip()
-#     if not re.match(REGEX_DESTINATION_DESCRIPTION, destination_description):
-#         raise Exception("company_exception destination_description")
-#     return destination_description
+DESTINATION_TITLE_MIN = 2
+DESTINATION_TITLE_MAX = 35
+REGEX_DESTINATION_TITLE = f"^.{{{DESTINATION_TITLE_MIN},{DESTINATION_TITLE_MAX}}}$"
+def validate_destination_title():
+    destination_title = request.form.get("title", "").strip()
+    if not re.match(REGEX_DESTINATION_TITLE, destination_title):
+        raise Exception("company_exception destination_title")
+    return destination_title
 
 
 ################ Validation country ################ 
-# DESTINATION_COUNTRY_MIN = 2
-# DESTINATION_COUNTRY_MAX = 50
-# REGEX_DESTINATION_COUNTRY = f"^.{{{DESTINATION_COUNTRY_MIN},{DESTINATION_COUNTRY_MAX}}}$"
-# def validate_destination_country():
-#     destination_country = request.form.get("country", "").strip()
-#     if not re.match(REGEX_DESTINATION_COUNTRY, destination_country):
-#         raise Exception("company_exception destination_country")
-#     return destination_country
-
-
-################ Validation location ################ 
-# DESTINATION_LOCATION_MIN = 2
-# DESTINATION_LOCATION_MAX = 50
-# REGEX_DESTINATION_LOCATION = f"^.{{{DESTINATION_LOCATION_MIN},{DESTINATION_LOCATION_MAX}}}$"
-# def validate_destination_location():
-#     destination_location = request.form.get("location", "").strip()
-#     if not re.match(REGEX_DESTINATION_LOCATION, destination_location):
-#         raise Exception("company_exception destination_location")
-#     return destination_location
+DESTINATION_COUNTRY_MIN = 2
+DESTINATION_COUNTRY_MAX = 50
+REGEX_DESTINATION_COUNTRY = f"^.{{{DESTINATION_COUNTRY_MIN},{DESTINATION_COUNTRY_MAX}}}$"
+def validate_destination_country():
+    destination_country = request.form.get("country", "").strip()
+    if not re.match(REGEX_DESTINATION_COUNTRY, destination_country):
+        raise Exception("company_exception destination_country")
+    return destination_country
 
 
 ################ Validation dates ################ 

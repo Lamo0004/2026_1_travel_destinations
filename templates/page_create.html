@@ -1,47 +1,8 @@
 {% include "_header.html" %}
 
 <main>
-    <form
-        action="{% if edit %}/api-update-destination/{{ destination.destination_pk }}{% else %}/api-create-destination{% endif %}"
-        method="post" autocomplete="off">
 
-        <div>
-            <label>Destination title</label>
-            <input name="title" type="text" required value="{{ destination.destination_title if edit }}">
-        </div>
-
-        <div>
-            <label>Destination description</label>
-            <textarea name="description">{{ destination.destination_description if edit }}</textarea>
-        </div>
-
-        <div>
-            <label>Country</label>
-            <input name="country" type="text" required value="{{ destination.destination_country if edit }}">
-        </div>
-
-        <div>
-            <label>Location</label>
-            <input name="location" type="text" value="{{ destination.destination_location if edit }}">
-        </div>
-
-        <div>
-            <label>Date from</label>
-            <input name="date_from" type="date" required
-                value="{% if edit %}{{ destination.destination_date_from | int | timestamp_to_date }}{% endif %}">
-        </div>
-
-        <div>
-            <label>Date to</label>
-            <input name="date_to" type="date" required
-                value="{% if edit %}{{ destination.destination_date_to | int | timestamp_to_date }}{% endif %}">
-        </div>
-
-        <button type="submit">
-            {% if edit %}Update destination{% else %}Create destination{% endif %}
-        </button>
-
-    </form>
+    {% include "___form_create.html" %}
 
     <script type="module" src="/static/dist/script.js"></script>
 </main>
