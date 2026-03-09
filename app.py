@@ -4,6 +4,7 @@ import uuid
 import time
 from datetime import datetime
 from flask_session import Session
+from functools import wraps
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 
@@ -17,6 +18,17 @@ if __name__ == "__main__":
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
+
+############################## 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user" not in session:
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 ############################## Tjekker log ind
 # def require_login():
 #     user = session.get("user")
@@ -24,10 +36,12 @@ Session(app)
 #         raise Exception("not_logged_in")
 #     return user
 
+
 ############################## 
 @app.template_filter('timestamp_to_date')
 def timestamp_to_date(ts):
     return datetime.utcfromtimestamp(int(ts)).strftime('%Y-%m-%d')
+
 
 ##############################
 @app.get("/signup")
@@ -170,6 +184,7 @@ def api_login():
 ##############################
 @app.get("/profile")
 @x.no_cache
+@login_required
 def show_profile():
     try:
         user = session.get("user", "")
@@ -230,6 +245,7 @@ def api_get_destinations():
 
 ##############################
 @app.get("/api-create-destination")
+@login_required
 def show_create_destination():
     try:
         return render_template("page_create.html", x=x)
@@ -240,6 +256,7 @@ def show_create_destination():
 
 ##############################
 @app.post("/api-create-destination")
+@login_required
 def api_create_destination():
     try:
         destination_pk = uuid.uuid4().hex
@@ -264,6 +281,9 @@ def api_create_destination():
         if destination_date_from > destination_date_to:
             return "Start date cannot be after end date", 400
 
+        user = session.get("user") # hent ejer
+        destination_user_pk = user["user_pk"]  # gem ejer
+
         db, cursor = x.db()
 
         q = """
@@ -275,9 +295,10 @@ def api_create_destination():
             destination_location,
             destination_date_from,
             destination_date_to,
-            destination_created_at
+            destination_created_at, 
+            user_pk
         ) 
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """
 
         cursor.execute(q, (
@@ -288,7 +309,8 @@ def api_create_destination():
             destination_location,
             destination_date_from,
             destination_date_to,
-            destination_created_at
+            destination_created_at,
+            destination_user_pk
         ))
 
         db.commit()
@@ -320,14 +342,27 @@ def api_create_destination():
 
 ##############################
 @app.delete("/api/destinations/<destination_pk>")
+@login_required
 def delete_destination(destination_pk):
     try:
-        # require_login()
-
         db, cursor = x.db()
+
+        user = session.get("user") # hent ejer
+        user_pk = user["user_pk"] # gem ejer
+        
+        # Tjek ejerskab
+        q = "SELECT user_pk FROM destinations WHERE destination_pk = %s"
+        cursor.execute(q, (destination_pk,))
+        destination = cursor.fetchone()
+        if not destination:
+            return "Destination not found", 404
+        if destination["user_pk"] != user_pk:
+            return "Unauthorized", 403
+
+        # Slet destination
         q = "DELETE FROM destinations WHERE destination_pk = %s"
         cursor.execute(q, (destination_pk,))
-        db.commit()
+        db.commit()  
 
         return "", 204
 
@@ -342,6 +377,7 @@ def delete_destination(destination_pk):
     
 ##############################
 @app.get("/edit-destination/<destination_pk>")
+@login_required
 def show_edit_destination(destination_pk):
     try:
         db, cursor = x.db()
@@ -364,8 +400,23 @@ def show_edit_destination(destination_pk):
 
 ##############################
 @app.post("/api-update-destination/<destination_pk>")
+@login_required
 def api_update_destination(destination_pk):
     try:
+        db, cursor = x.db()
+        
+        user = session.get("user") # hent ejer
+        user_pk = user["user_pk"] # gem ejer
+
+        # Tjek ejerskab
+        q = "SELECT user_pk FROM destinations WHERE destination_pk = %s"
+        cursor.execute(q, (destination_pk,))
+        destination = cursor.fetchone()
+        if not destination:
+            return "Destination not found", 404
+        if destination["user_pk"] != user_pk:
+            return "Unauthorized", 403
+
         # Hent data fra formular
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
@@ -374,21 +425,16 @@ def api_update_destination(destination_pk):
         date_from_str = request.form.get("date_from", "").strip()
         date_to_str = request.form.get("date_to", "").strip()
 
-        # Tjek at alle påkrævede felter er udfyldt
         if not title or not country or not date_from_str or not date_to_str:
             return "Missing required fields", 400
 
-        # Konverter dato til epoch timestamp
         date_from = int(datetime.strptime(date_from_str, "%Y-%m-%d").timestamp())
         date_to = int(datetime.strptime(date_to_str, "%Y-%m-%d").timestamp())
-
-        # Check at date_from ikke er efter date_to
         if date_from > date_to:
             return "Start date cannot be after end date", 400
 
-        db, cursor = x.db()
-
-        q = """
+        # Opdater destination
+        q_update = """
         UPDATE destinations SET
             destination_title=%s,
             destination_description=%s,
@@ -398,18 +444,14 @@ def api_update_destination(destination_pk):
             destination_date_to=%s
         WHERE destination_pk=%s
         """
-
-        cursor.execute(q, (title, description, country, location, date_from, date_to, destination_pk))
+        cursor.execute(q_update, (title, description, country, location, date_from, date_to, destination_pk))
         db.commit()
 
         form_create = render_template("___form_create.html", x=x)
-
         return f"""
         <browser mix-replace="form">{form_create}</browser> 
         <browser mix-redirect="/destinations"></browser>
         """
-
-        return redirect("/destinations")
 
     except Exception as ex:
         ic(ex)
