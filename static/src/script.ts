@@ -13,9 +13,11 @@ window.addEventListener("load", async () => {
     kopi.getElementById("destination").textContent = destination.destination_country + ", " + destination.destination_location;
     kopi.getElementById("date").textContent = destination.destination_date_from + "-" + destination.destination_date_to;
 
-    // Tilføj Delete-funktionalitet
+    // Tilføj delete funktion til KUN ejeren (kun ejeren kan se knappen)
     const deleteBtn = kopi.querySelector(".deleteBtn");
-    if (deleteBtn) {
+    if (!destination.is_owner && deleteBtn) {
+      deleteBtn.remove();
+    } else if (deleteBtn) {
       deleteBtn.addEventListener("click", async () => {
         const shouldDelete = await showCustomConfirm(`Er du sikker på, at du vil slette "${destination.destination_title}"?`);
         if (!shouldDelete) return;
@@ -23,7 +25,6 @@ window.addEventListener("load", async () => {
         try {
           const response = await fetch(`/api/destinations/${destination.destination_pk}`, { method: "DELETE" });
           if (response.status === 204) {
-            // Fjern destination fra DOM
             deleteBtn.closest(".destination").remove();
           } else {
             alert("Kunne ikke slette destinationen");
@@ -35,9 +36,11 @@ window.addEventListener("load", async () => {
       });
     }
 
-    // Tilføj Edit-link
+    // Tilføj edit funktion til KUN ejeren (kun ejeren kan se linket)
     const editLink = kopi.querySelector(".editLink") as HTMLAnchorElement;
-    if (editLink) {
+    if (!destination.is_owner && editLink) {
+      editLink.remove();
+    } else if (editLink) {
       editLink.href = `/edit-destination/${destination.destination_pk}`;
     }
 

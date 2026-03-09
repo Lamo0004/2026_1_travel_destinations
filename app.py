@@ -235,12 +235,23 @@ def api_get_destinations():
         cursor.execute(q)
         destinations = cursor.fetchall()
 
+        # Tjekker om der er en logget bruger, ellers None
+        current_user_pk = session["user"]["user_pk"] if "user" in session else None
+
+        # Markerer hvilke destinationer brugeren ejer – is_owner = True for destinationer, der tilhører den loggede bruger
+        for dest in destinations:
+            dest["is_owner"] = "user" in session and dest["user_pk"] == session["user"]["user_pk"]
+
         return jsonify(destinations)
 
     except Exception as ex:
         ic(ex)
         error_message = {"error": "System under maintenance"}
         return jsonify(error_message), 500
+    
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
 
 
 ##############################
