@@ -37,11 +37,11 @@ window.addEventListener("load", async () => {
     }
 
     // Tilføj edit funktion til KUN ejeren (kun ejeren kan se linket)
-    const editLink = kopi.querySelector(".editLink") as HTMLAnchorElement;
-    if (!destination.is_owner && editLink) {
-      editLink.remove();
-    } else if (editLink) {
-      editLink.href = `/edit-destination/${destination.destination_pk}`;
+    const editBtn = kopi.querySelector(".editBtn") as HTMLAnchorElement;
+    if (!destination.is_owner && editBtn) {
+      editBtn.remove();
+    } else if (editBtn) {
+      editBtn.href = `/edit-destination/${destination.destination_pk}`;
     }
 
     document.getElementById("destinationsContainer").appendChild(kopi);

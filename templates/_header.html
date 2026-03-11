@@ -21,14 +21,16 @@
     </div>
 
     <nav>
-        <a href="/">Home</a>
-        <a href="/destinations">Destinations</a>
-        <a href="/signup">Signup</a>
+        <div class="nav-container">
+            <a href="/">Home</a>
+            <a href="/destinations">Destinations</a>
+            <a href="/signup">Signup</a>
 
-        {% if not user %}
-        <a href="/login">Login</a>
-        {% else %}
-        <a href="/logout">Logout</a>
-        {% endif %}
+            {% if not user %}
+            <a href="/login">Login</a>
+            {% else %}
+            <a href="/logout">Logout</a>
+            {% endif %}
+        </div>
 
     </nav>

@@ -210,7 +210,8 @@ def logout():
 @app.get("/")
 def show_home():
     try:
-        return render_template("page_home.html")
+        user = session.get("user", "")
+        return render_template("page_home.html", user=user, x=x)
     except Exception as ex:
         ic(ex)
         return "ups"
@@ -220,7 +221,8 @@ def show_home():
 @app.get("/destinations")
 def show_destinations():
     try:
-        return render_template("page_destinations.html")
+        user = session.get("user", "")
+        return render_template("page_destinations.html", user=user)
     except Exception as ex:
         ic(ex)
         return "ups" 
@@ -259,7 +261,8 @@ def api_get_destinations():
 @login_required
 def show_create_destination():
     try:
-        return render_template("page_create.html", x=x)
+        user = session.get("user", "")
+        return render_template("page_create.html", x=x, user=user,)
     except Exception as ex:
         ic(ex)
         return "ups"
@@ -399,7 +402,8 @@ def show_edit_destination(destination_pk):
         if not destination:
             return "Destination not found", 404
 
-        return render_template("page_create.html", destination=destination, edit=True, x=x)
+        user = session.get("user", "")
+        return render_template("page_create.html", destination=destination, edit=True, x=x, user=user)
         return '<browser mix-redirect="/destinations"></browser>'
     except Exception as ex:
         ic(ex)
