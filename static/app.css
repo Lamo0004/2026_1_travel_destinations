@@ -294,3 +294,14 @@ footer {
   transform: translateY(-4px);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
 }
+
+.input-error {
+  border: 2px solid var(--color-error);
+  background-color: #ffe6e6;
+}
+
+.error-message {
+  color: var(--color-error);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}

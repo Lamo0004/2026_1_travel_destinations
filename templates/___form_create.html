@@ -3,10 +3,10 @@
     autocomplete="off">
 
     <div>
-        <label>Destination title <span>{{x.DESTINATION_TITLE_MIN}} to {{x.DESTINATION_TITLE_MAX}}
+        <label>Destination title * <span>{{x.DESTINATION_TITLE_MIN}} to {{x.DESTINATION_TITLE_MAX}}
                 characters</span></label>
         <input name="title" placeholder="title" type="text" value="{{ destination.destination_title if edit }}"
-            mix-validate="{{x.REGEX_DESTINATION_TITLE}}">
+            mix-validate="{{x.REGEX_DESTINATION_TITLE}}" required>
     </div>
 
     <div>
@@ -16,10 +16,10 @@
     </div>
 
     <div>
-        <label>Country <span>{{x.DESTINATION_COUNTRY_MIN}} to {{x.DESTINATION_COUNTRY_MAX}}
+        <label>Country * <span>{{x.DESTINATION_COUNTRY_MIN}} to {{x.DESTINATION_COUNTRY_MAX}}
                 characters</span></label>
         <input name="country" placeholder="country" type="text" value="{{ destination.destination_country if edit }}"
-            mix-validate="{{x.REGEX_DESTINATION_COUNTRY}}">
+            mix-validate="{{x.REGEX_DESTINATION_COUNTRY}}" required>
     </div>
 
     <div>
@@ -31,13 +31,13 @@
     <div>
         <label>Date from</label>
         <input name="date_from" type="date"
-            value="{% if edit %}{{ destination.destination_date_from | int | timestamp_to_date }}{% endif %}">
+            value="{% if edit %}{{ destination.destination_date_from | int | timestamp_to_date }}{% endif %}" required>
     </div>
 
     <div>
         <label>Date to</label>
         <input name="date_to" type="date"
-            value="{% if edit %}{{ destination.destination_date_to | int | timestamp_to_date }}{% endif %}">
+            value="{% if edit %}{{ destination.destination_date_to | int | timestamp_to_date }}{% endif %}" required>
     </div>
 
     <button type="submit">

@@ -290,23 +290,13 @@ def api_create_destination():
         destination_description = request.form.get("description", "").strip()
         destination_country = x.validate_destination_country()
         destination_location = request.form.get("location", "").strip()
+        date_from_str = request.form.get("date_from", "").strip()
+        date_to_str = request.form.get("date_to", "").strip()
+        destination_date_from, destination_date_to = x.validate_destination_dates(date_from_str, date_to_str)
         destination_created_at = int(time.time())
-        
-        # Validering af datoer 
-        try:
-            destination_date_from, destination_date_to = x.validate_destination_dates(date_from_str, date_to_str)
-        except Exception as ex:
-            error_map = {
-                "company_exception date_missing": "Both start and end dates are required",
-                "company_exception date_format_invalid": "Dates must be in format YYYY-MM-DD",
-                "company_exception date_from_after_date_to": "Start date cannot be after end date"
-                }
-            message = error_map.get(str(ex), "Invalid date")
-            ___tip = render_template("___tip.html", status="error", message=message)
-            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 
         user = session.get("user") # hent ejer
-        destination_user_pk = user["user_pk"]  # gem ejer – slette???????!!!!!!!!!!!
+        destination_user_pk = user["user_pk"]  # gem ejer 
 
         db, cursor = x.db()
 
@@ -354,6 +344,16 @@ def api_create_destination():
             ___tip = render_template("___tip.html", status="error",  message=error_message)
             return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
         
+        if "company_exception date_missing" in str(ex):
+            error_message = f"Both start and end dates are required"
+            ___tip = render_template("___tip.html", status="error",  message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+
+        if "company_exception date_from_after_date_to" in str(ex):
+            error_message = f"Start date cannot be after end date"
+            ___tip = render_template("___tip.html", status="error",  message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+        
         # Worst case
         error_message = "System under maintenance"
         ___tip = render_template("___tip.html", status="error",  message=error_message)
@@ -365,16 +365,50 @@ def api_create_destination():
 
 
 ##############################
+# @app.delete("/api/destinations/<destination_pk>")
+# @login_required
+# def delete_destination(destination_pk):
+#     try:
+#         db, cursor = x.db()
+
+#         user = session.get("user") # hent ejer
+#         user_pk = user["user_pk"] # gem ejer
+        
+#         # Henter destination og tjek ejerskab
+#         q = "SELECT user_pk FROM destinations WHERE destination_pk = %s"
+#         cursor.execute(q, (destination_pk,))
+#         destination = cursor.fetchone()
+#         if not destination:
+#             return "Destination not found", 404
+#         if destination["user_pk"] != user_pk:
+#             return "Unauthorized", 400
+
+#         # Sletter destination
+#         q = "DELETE FROM destinations WHERE destination_pk = %s"
+#         cursor.execute(q, (destination_pk,))
+#         db.commit()  
+
+#         return "", 204
+
+#     except Exception as ex:
+#         ic(ex)
+#         return "System error", 500
+
+#     finally:
+#         if "cursor" in locals(): cursor.close()
+#         if "db" in locals(): db.close()
 @app.delete("/api/destinations/<destination_pk>")
 @login_required
 def delete_destination(destination_pk):
     try:
+        user = session.get("user")
+        if not user:
+            return "Unauthorized", 403
+        user_pk = user["user_pk"]
+
         db, cursor = x.db()
 
-        user = session.get("user") # hent ejer
-        user_pk = user["user_pk"] # gem ejer
-        
-        # Tjek ejerskab
+        # Hent destination og tjek ejerskab
         q = "SELECT user_pk FROM destinations WHERE destination_pk = %s"
         cursor.execute(q, (destination_pk,))
         destination = cursor.fetchone()
@@ -384,15 +418,15 @@ def delete_destination(destination_pk):
             return "Unauthorized", 403
 
         # Slet destination
-        q = "DELETE FROM destinations WHERE destination_pk = %s"
-        cursor.execute(q, (destination_pk,))
-        db.commit()  
+        q_delete = "DELETE FROM destinations WHERE destination_pk = %s"
+        cursor.execute(q_delete, (destination_pk,))
+        db.commit()
 
         return "", 204
 
     except Exception as ex:
         ic(ex)
-        return "System error", 500
+        return "System under maintenance", 500
 
     finally:
         if "cursor" in locals(): cursor.close()
@@ -410,7 +444,7 @@ def show_edit_destination(destination_pk):
         destination = cursor.fetchone()
 
         if not destination:
-            return "Destination not found", 404
+            return "Destination not found", 400
 
         user = session.get("user", "")
         return render_template("page_create.html", destination=destination, edit=True, x=x, user=user)
@@ -431,7 +465,7 @@ def api_update_destination(destination_pk):
         db, cursor = x.db()
         
         user = session.get("user") # hent ejer
-        user_pk = user["user_pk"] # gem ejer – slette?????????!!!!!!!!!!
+        user_pk = user["user_pk"] # gem ejer 
 
         # Tjekker ejerskab
         q = "SELECT user_pk FROM destinations WHERE destination_pk = %s"
@@ -443,23 +477,18 @@ def api_update_destination(destination_pk):
             return "Unauthorized", 400
 
         # Henter data fra formular
-        title = request.form.get("title", "").strip()
-        description = request.form.get("description", "").strip()
-        country = request.form.get("country", "").strip()
-        location = request.form.get("location", "").strip()
+        # Validering
+        destination_title = x.validate_destination_title()  # hent fra form
+        destination_country = x.validate_destination_country()  # hent fra form
+        destination_description = request.form.get("description", "").strip()
+        destination_location = request.form.get("location", "").strip()
+        destination_date_from, destination_date_to = x.validate_destination_dates(
+            request.form.get("date_from", "").strip(),
+            request.form.get("date_to", "").strip()
+        )
 
-        # Validerer datoer
-        try:
-            destination_date_from, destination_date_to = x.validate_destination_dates(date_from_str, date_to_str)
-        except Exception as ex:
-            error_map = {
-                "company_exception date_missing": "Both start and end dates are required",
-                "company_exception date_format_invalid": "Dates must be in format YYYY-MM-DD",
-                "company_exception date_from_after_date_to": "Start date cannot be after end date"
-                }
-            message = error_map.get(str(ex), "Invalid date")
-            ___tip = render_template("___tip.html", status="error", message=message)
-            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+        # DEBUG: check at date_from/to er ints
+        ic(destination_date_from, destination_date_to)
 
         # Opdater destination
         q_update = """
@@ -472,7 +501,15 @@ def api_update_destination(destination_pk):
             destination_date_to=%s
         WHERE destination_pk=%s
         """
-        cursor.execute(q_update, (title, description, country, location, date_from, date_to, destination_pk))
+        cursor.execute(q_update, (
+            destination_title,
+            destination_description,
+            destination_country,
+            destination_location,
+            destination_date_from,
+            destination_date_to,
+            destination_pk
+        ))
         db.commit()
 
         form_create = render_template("___form_create.html", x=x)
@@ -480,10 +517,35 @@ def api_update_destination(destination_pk):
         <browser mix-replace="form">{form_create}</browser> 
         <browser mix-redirect="/destinations"></browser>
         """
+        
 
     except Exception as ex:
         ic(ex)
-        return "System error", 500
+
+        if "company_exception destination_title" in str(ex):
+            error_message = f"Destination title must be {x.DESTINATION_TITLE_MIN} to {x.DESTINATION_TITLE_MAX} characters"
+            ___tip = render_template("___tip.html", status="error", message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+
+        if "company_exception destination_country" in str(ex):
+            error_message = f"Country must be {x.DESTINATION_COUNTRY_MIN} to {x.DESTINATION_COUNTRY_MAX} characters"
+            ___tip = render_template("___tip.html", status="error", message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+
+        if "company_exception date_missing" in str(ex):
+            error_message = "Both start and end dates are required"
+            ___tip = render_template("___tip.html", status="error", message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+
+        if "company_exception date_from_after_date_to" in str(ex):
+            error_message = "Start date cannot be after end date"
+            ___tip = render_template("___tip.html", status="error", message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+
+        # Worst case
+        error_message = "System under maintenance"
+        ___tip = render_template("___tip.html", status="error", message=error_message)
+        return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 500
 
     finally:
         if "cursor" in locals(): cursor.close()

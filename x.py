@@ -36,7 +36,6 @@ def no_cache(view):
     return no_cache_view
 
 
-
 ################ Validation first name ################ 
 USER_FIRST_NAME_MIN = 2
 USER_FIRST_NAME_MAX = 20
@@ -102,21 +101,27 @@ def validate_destination_country():
 
 
 ################ Validation start and end dates ################ 
-def validate_destination_dates(date_from_str: str, date_to_str: str):
+DATE_FROM_KEY = "date_from"
+DATE_TO_KEY = "date_to"
+DATE_FORMAT = "%Y-%m-%d"
+
+def validate_destination_dates(date_from_str=None, date_to_str=None):
+    if date_from_str is None:
+        date_from_str = request.form.get(DATE_FROM_KEY, "").strip()
+    if date_to_str is None:
+        date_to_str = request.form.get(DATE_TO_KEY, "").strip()
+
     if not date_from_str or not date_to_str:
         raise Exception("company_exception date_missing")
 
     try:
-        date_from = datetime.strptime(date_from_str, "%Y-%m-%d")
-        date_to = datetime.strptime(date_to_str, "%Y-%m-%d")
+        date_from = datetime.strptime(date_from_str, DATE_FORMAT)
+        date_to = datetime.strptime(date_to_str, DATE_FORMAT)
     except ValueError:
         raise Exception("company_exception date_format_invalid")
 
     if date_from > date_to:
         raise Exception("company_exception date_from_after_date_to")
 
-    timestamp_from = int(date_from.timestamp())
-    timestamp_to = int(date_to.timestamp())
-
-    return timestamp_from, timestamp_to
+    return int(date_from.timestamp()), int(date_to.timestamp())
 

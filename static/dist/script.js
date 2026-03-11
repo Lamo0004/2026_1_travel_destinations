@@ -15,16 +15,32 @@ window.addEventListener("load", async () => {
             deleteBtn.remove();
         }
         else if (deleteBtn) {
-            deleteBtn.addEventListener("click", async () => {
+            deleteBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
                 const shouldDelete = await showCustomConfirm(`Er du sikker på, at du vil slette "${destination.destination_title}"?`);
                 if (!shouldDelete)
                     return;
                 try {
-                    const response = await fetch(`/api/destinations/${destination.destination_pk}`, { method: "DELETE" });
+                    const response = await fetch(`/api/destinations/${destination.destination_pk}`, {
+                        method: "DELETE",
+                        credentials: "same-origin",
+                    });
+                    console.log("Fetch status:", response.status);
+                    const text = await response.text();
+                    console.log("Response text:", text);
                     if (response.status === 204) {
-                        deleteBtn.closest(".destination").remove();
+                        const destinationElement = deleteBtn.closest(".destinationCard");
+                        if (destinationElement) {
+                            destinationElement.remove();
+                        }
+                        else {
+                            alert(`Kunne ikke slette destinationen: ${response.status} - ${text}`);
+                            console.warn("Kunne ikke finde destinationCard til fjernelse");
+                        }
                     }
                     else {
+                        const text = await response.text();
+                        console.log("Response text:", text);
                         alert("Kunne ikke slette destinationen");
                     }
                 }
@@ -43,6 +59,49 @@ window.addEventListener("load", async () => {
             editBtn.href = `/edit-destination/${destination.destination_pk}`;
         }
         document.getElementById("destinationsContainer").appendChild(kopi);
+    });
+});
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("form");
+    const dateFrom = form.querySelector('input[name="date_from"]');
+    const dateTo = form.querySelector('input[name="date_to"]');
+    if (!dateFrom || !dateTo)
+        return;
+    // Tilføj en error-besked container
+    let errorContainer = document.createElement("div");
+    errorContainer.className = "error-message";
+    dateTo.parentNode?.appendChild(errorContainer);
+    form.addEventListener("submit", (e) => {
+        let valid = true;
+        errorContainer.textContent = "";
+        // Fjern tidligere fejlkoder
+        dateFrom.classList.remove("input-error");
+        dateTo.classList.remove("input-error");
+        if (!dateFrom.value) {
+            valid = false;
+            dateFrom.classList.add("input-error");
+        }
+        if (!dateTo.value) {
+            valid = false;
+            dateTo.classList.add("input-error");
+        }
+        // Ekstra check: start dato skal være før slut dato
+        if (dateFrom.value && dateTo.value) {
+            const fromDate = new Date(dateFrom.value);
+            const toDate = new Date(dateTo.value);
+            if (fromDate > toDate) {
+                valid = false;
+                dateFrom.classList.add("input-error");
+                dateTo.classList.add("input-error");
+                errorContainer.textContent = "Start date cannot be after end date.";
+            }
+        }
+        if (!valid) {
+            e.preventDefault(); // forhindrer submit
+            if (!errorContainer.textContent) {
+                errorContainer.textContent = "Both start and end dates are required.";
+            }
+        }
     });
 });
 // Bekræftelses-dialog funktion
