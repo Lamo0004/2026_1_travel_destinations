@@ -11,7 +11,7 @@ window.addEventListener("load", async () => {
     kopi.getElementById("title").textContent = destination.destination_title;
     kopi.getElementById("description").textContent = destination.destination_description;
     kopi.getElementById("destination").textContent = destination.destination_country + ", " + destination.destination_location;
-    kopi.getElementById("date").textContent = destination.destination_date_from + "-" + destination.destination_date_to;
+    kopi.getElementById("date").textContent = destination.destination_date_from_formatted + " to " + destination.destination_date_to_formatted;
 
     // Tilføj delete funktion til KUN ejeren (kun ejeren kan se knappen)
     const deleteBtn = kopi.querySelector(".deleteBtn");

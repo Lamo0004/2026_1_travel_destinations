@@ -243,6 +243,18 @@ def api_get_destinations():
         # Markerer hvilke destinationer brugeren ejer – is_owner = True for destinationer, der tilhører den loggede bruger
         for dest in destinations:
             dest["is_owner"] = "user" in session and dest["user_pk"] == session["user"]["user_pk"]
+            
+            if dest.get("destination_date_from"):
+                dest["destination_date_from_formatted"] = datetime.utcfromtimestamp(dest["destination_date_from"]).strftime("%Y-%m-%d")
+                
+            else:
+                dest["destination_date_from_formatted"] = ""
+                
+            if dest.get("destination_date_to"):
+                dest["destination_date_to_formatted"] = datetime.utcfromtimestamp(dest["destination_date_to"]).strftime("%Y-%m-%d")
+                
+            else:
+                dest["destination_date_to_formatted"] = ""
 
         return jsonify(destinations)
 
@@ -278,25 +290,23 @@ def api_create_destination():
         destination_description = request.form.get("description", "").strip()
         destination_country = x.validate_destination_country()
         destination_location = request.form.get("location", "").strip()
-        date_from_str = request.form.get("date_from", "").strip()
-        date_to_str = request.form.get("date_to", "").strip()
         destination_created_at = int(time.time())
         
-        destination_date_from = None
-        destination_date_to = None
-
-        if date_from_str:
-            destination_date_from = int(datetime.strptime(date_from_str, "%Y-%m-%d").timestamp())
-        
-        if date_to_str:
-            destination_date_to = int(datetime.strptime(date_to_str, "%Y-%m-%d").timestamp())
-
-        # Check at date_from ikke er efter date_to
-        if destination_date_from > destination_date_to:
-            return "Start date cannot be after end date", 400
+        # Validering af datoer 
+        try:
+            destination_date_from, destination_date_to = x.validate_destination_dates(date_from_str, date_to_str)
+        except Exception as ex:
+            error_map = {
+                "company_exception date_missing": "Both start and end dates are required",
+                "company_exception date_format_invalid": "Dates must be in format YYYY-MM-DD",
+                "company_exception date_from_after_date_to": "Start date cannot be after end date"
+                }
+            message = error_map.get(str(ex), "Invalid date")
+            ___tip = render_template("___tip.html", status="error", message=message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 
         user = session.get("user") # hent ejer
-        destination_user_pk = user["user_pk"]  # gem ejer
+        destination_user_pk = user["user_pk"]  # gem ejer – slette???????!!!!!!!!!!!
 
         db, cursor = x.db()
 
@@ -421,32 +431,35 @@ def api_update_destination(destination_pk):
         db, cursor = x.db()
         
         user = session.get("user") # hent ejer
-        user_pk = user["user_pk"] # gem ejer
+        user_pk = user["user_pk"] # gem ejer – slette?????????!!!!!!!!!!
 
-        # Tjek ejerskab
+        # Tjekker ejerskab
         q = "SELECT user_pk FROM destinations WHERE destination_pk = %s"
         cursor.execute(q, (destination_pk,))
         destination = cursor.fetchone()
         if not destination:
-            return "Destination not found", 404
+            return "Destination not found", 400
         if destination["user_pk"] != user_pk:
-            return "Unauthorized", 403
+            return "Unauthorized", 400
 
-        # Hent data fra formular
+        # Henter data fra formular
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
         country = request.form.get("country", "").strip()
         location = request.form.get("location", "").strip()
-        date_from_str = request.form.get("date_from", "").strip()
-        date_to_str = request.form.get("date_to", "").strip()
 
-        if not title or not country or not date_from_str or not date_to_str:
-            return "Missing required fields", 400
-
-        date_from = int(datetime.strptime(date_from_str, "%Y-%m-%d").timestamp())
-        date_to = int(datetime.strptime(date_to_str, "%Y-%m-%d").timestamp())
-        if date_from > date_to:
-            return "Start date cannot be after end date", 400
+        # Validerer datoer
+        try:
+            destination_date_from, destination_date_to = x.validate_destination_dates(date_from_str, date_to_str)
+        except Exception as ex:
+            error_map = {
+                "company_exception date_missing": "Both start and end dates are required",
+                "company_exception date_format_invalid": "Dates must be in format YYYY-MM-DD",
+                "company_exception date_from_after_date_to": "Start date cannot be after end date"
+                }
+            message = error_map.get(str(ex), "Invalid date")
+            ___tip = render_template("___tip.html", status="error", message=message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 
         # Opdater destination
         q_update = """

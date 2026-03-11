@@ -2,7 +2,8 @@ from flask import request, make_response
 import mysql.connector
 import re # Libeary to regular expressions (also called Regex)
 from functools import wraps
-import datetime
+import time
+from datetime import datetime
 
 # Denne fil ved ikke noget om browseren
 
@@ -100,18 +101,22 @@ def validate_destination_country():
     return destination_country
 
 
-################ Validation dates ################ 
-# def validate_destination_dates(date_from_str, date_to_str):
-#     # Konverter string til datetime
-#     date_from = datetime.datetime.strptime(date_from_str, "%Y-%m-%d")
-#     date_to = datetime.datetime.strptime(date_to_str, "%Y-%m-%d")
-    
-#     if date_to < date_from:
-#         raise Exception("company_exception date_to_before_date_from")
-    
-#     # Konverter til Epoch timestamp
-#     timestamp_from = int(time.mktime(date_from.timetuple()))
-#     timestamp_to = int(time.mktime(date_to.timetuple()))
-    
-#     return timestamp_from, timestamp_to
+################ Validation start and end dates ################ 
+def validate_destination_dates(date_from_str: str, date_to_str: str):
+    if not date_from_str or not date_to_str:
+        raise Exception("company_exception date_missing")
+
+    try:
+        date_from = datetime.strptime(date_from_str, "%Y-%m-%d")
+        date_to = datetime.strptime(date_to_str, "%Y-%m-%d")
+    except ValueError:
+        raise Exception("company_exception date_format_invalid")
+
+    if date_from > date_to:
+        raise Exception("company_exception date_from_after_date_to")
+
+    timestamp_from = int(date_from.timestamp())
+    timestamp_to = int(date_to.timestamp())
+
+    return timestamp_from, timestamp_to
 
