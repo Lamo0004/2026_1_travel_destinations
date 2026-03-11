@@ -1,11 +1,11 @@
-// Henter destinationer
 export async function getDestinations() {
-  try {
-    const response = await fetch("/api/destinations");
-    if (!response.ok) return [];
-    return await response.json();
-  } catch (error) {
-    console.error("Fejl i fetch:", error);
-    return [];
+  let url = "/api/destinations";
+
+  // hvis vi er på profile siden
+  if (window.location.pathname === "/profile") {
+    url = "/api/profile";
   }
+
+  const response = await fetch(url);
+  return await response.json();
 }

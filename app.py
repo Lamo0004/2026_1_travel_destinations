@@ -196,6 +196,39 @@ def show_profile():
 
 
 ##############################
+@app.get("/api/profile")
+@login_required
+def api_get_profile_destinations():
+    try:
+        user = session.get("user")
+        user_pk = user["user_pk"]
+
+        db, cursor = x.db()
+        q = "SELECT * FROM destinations WHERE user_pk = %s"
+        cursor.execute(q, (user_pk,))
+        destinations = cursor.fetchall()
+
+        for dest in destinations:
+            dest["is_owner"] = True
+
+            if dest.get("destination_date_from"):
+                dest["destination_date_from_formatted"] = datetime.utcfromtimestamp(dest["destination_date_from"]).strftime("%Y-%m-%d")
+            else:
+                dest["destination_date_from_formatted"] = ""
+
+            if dest.get("destination_date_to"):
+                dest["destination_date_to_formatted"] = datetime.utcfromtimestamp(dest["destination_date_to"]).strftime("%Y-%m-%d")
+            else:
+                dest["destination_date_to_formatted"] = ""
+
+        return jsonify(destinations)
+
+    finally:
+        if "cursor" in locals(): cursor.close()
+        if "db" in locals(): db.close()
+
+
+##############################
 @app.get("/logout")
 def logout():
     try:

@@ -2,7 +2,7 @@ import { getDestinations } from "./api-functions.js";
 // Henter destinationer
 window.addEventListener("load", async () => {
     const destinations = await getDestinations();
-    destinations.map((destination) => {
+    destinations.forEach((destination) => {
         const template = document.getElementById("destinationCardTemplate");
         const kopi = template.content.cloneNode(true);
         kopi.getElementById("title").textContent = destination.destination_title;

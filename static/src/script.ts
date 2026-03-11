@@ -4,7 +4,7 @@ import { getDestinations } from "./api-functions.js";
 window.addEventListener("load", async () => {
   const destinations = await getDestinations();
 
-  destinations.map((destination) => {
+  destinations.forEach((destination) => {
     const template: any = document.getElementById("destinationCardTemplate");
     const kopi: any = template.content.cloneNode(true);
 

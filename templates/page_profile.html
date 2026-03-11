@@ -2,6 +2,13 @@
 
 <main>
     <h1>Hi {{ user.user_first_name }}</h1>
+    <p>On this page you can only see your own travel destinations</p>
+
+    <div id="destinationsContainer"></div>
+
+    <template id="destinationCardTemplate">
+        {% include "___card_destination.html" %}
+    </template>
 </main>
 
 {% include "_footer.html" %}
