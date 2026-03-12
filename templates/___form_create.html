@@ -2,7 +2,8 @@
     mix-post="/api-create-destination" {% endif %} autocomplete="off" novalidate>
 
     <div>
-        <label>Destination title <span>* {{x.DESTINATION_TITLE_MIN}} to {{x.DESTINATION_TITLE_MAX}}
+        <label>Destination title <span>*</span></label>
+        <label for=""><span>{{x.DESTINATION_TITLE_MIN}} to {{x.DESTINATION_TITLE_MAX}}
                 characters</span></label>
         <input name="title" placeholder="title" type="text" value="{{ destination.destination_title if edit }}"
             mix-validate="{{x.REGEX_DESTINATION_TITLE}}" required>
@@ -15,14 +16,16 @@
     </div>
 
     <div>
-        <label>Country <span>* {{x.DESTINATION_COUNTRY_MIN}} to {{x.DESTINATION_COUNTRY_MAX}}
+        <label>Country <span>*</span></label>
+        <label for=""><span>{{x.DESTINATION_COUNTRY_MIN}} to {{x.DESTINATION_COUNTRY_MAX}}
                 characters</span></label>
         <input name="country" placeholder="country" type="text" value="{{ destination.destination_country if edit }}"
             mix-validate="{{x.REGEX_DESTINATION_COUNTRY}}" required>
     </div>
 
     <div>
-        <label>Location <span>* {{x.DESTINATION_LOCATION_MIN}} to {{x.DESTINATION_LOCATION_MAX}}
+        <label>Location <span>* </span></label>
+        <label for=""><span>{{x.DESTINATION_LOCATION_MIN}} to {{x.DESTINATION_LOCATION_MAX}}
                 characters</span></label>
         <input name="location" placeholder="location" type="text" value="{{ destination.destination_location if edit }}"
             mix-validate="{{x.REGEX_DESTINATION_LOCATION}}" required>
@@ -36,11 +39,12 @@
 
     <div>
         <label>Date to <span>*</span></label>
+        <label for=""><span>Date to has to be after date from</span></label>
         <input name="date_to" type="date"
             value="{% if edit %}{{ destination.destination_date_to | int | timestamp_to_date }}{% endif %}" required>
     </div>
 
-    <button type="submit">
+    <button type="submit" class="btn-primary">
         {% if edit %}Update destination{% else %}Create destination{% endif %}
     </button>
 

@@ -382,7 +382,7 @@ def api_create_destination():
         if "company_exception date_from_after_date_to" in str(ex):
             error_message = f"Start date cannot be after end date"
             ___tip = render_template("___tip.html", status="error",  message=error_message)
-            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+            return ___tip, 400 # Retunere IKKE i browser, for så vises tool i frontend, fordi jeg ikke benytte mix-validate på date-input-felter
         
         # Worst case
         error_message = "System under maintenance"
@@ -538,12 +538,12 @@ def api_update_destination(destination_pk):
             return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 
         if "company_exception date_missing" in str(ex):
-            error_message = "Both start and end dates are required"
+            error_message = "Both from and to dates are required"
             ___tip = render_template("___tip.html", status="error", message=error_message)
             return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 
         if "company_exception date_from_after_date_to" in str(ex):
-            error_message = "Start date cannot be after end date"
+            error_message = "Date from cannot be after date to"
             ___tip = render_template("___tip.html", status="error", message=error_message)
             return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 

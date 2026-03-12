@@ -65,55 +65,31 @@ window.addEventListener("load", async () => {
   });
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("form") as HTMLFormElement;
+document.addEventListener("submit", (e) => {
+  const form = e.target as HTMLFormElement;
   const dateFrom = form.querySelector<HTMLInputElement>('input[name="date_from"]');
   const dateTo = form.querySelector<HTMLInputElement>('input[name="date_to"]');
-
   if (!dateFrom || !dateTo) return;
 
-  // Tilføj en error-besked container
-  let errorContainer = document.createElement("div");
-  errorContainer.className = "error-message";
-  dateTo.parentNode?.appendChild(errorContainer);
+  dateFrom.classList.remove("input-error");
+  dateTo.classList.remove("input-error");
 
-  form.addEventListener("submit", (e: Event) => {
-    let valid = true;
-    errorContainer.textContent = "";
+  const fromVal = dateFrom.value;
+  const toVal = dateTo.value;
 
-    // Fjern tidligere fejlkoder
-    dateFrom.classList.remove("input-error");
-    dateTo.classList.remove("input-error");
+  let valid = true;
 
-    if (!dateFrom.value) {
-      valid = false;
-      dateFrom.classList.add("input-error");
-    }
+  // check required
+  if (!fromVal || !toVal) valid = false;
 
-    if (!dateTo.value) {
-      valid = false;
-      dateTo.classList.add("input-error");
-    }
+  // check start < slut
+  if (fromVal && toVal && new Date(fromVal) > new Date(toVal)) valid = false;
 
-    // Ekstra check: start dato skal være før slut dato
-    if (dateFrom.value && dateTo.value) {
-      const fromDate = new Date(dateFrom.value);
-      const toDate = new Date(dateTo.value);
-      if (fromDate > toDate) {
-        valid = false;
-        dateFrom.classList.add("input-error");
-        dateTo.classList.add("input-error");
-        errorContainer.textContent = "Start date cannot be after end date.";
-      }
-    }
-
-    if (!valid) {
-      e.preventDefault(); // forhindrer submit
-      if (!errorContainer.textContent) {
-        errorContainer.textContent = "Both start and end dates are required.";
-      }
-    }
-  });
+  if (!valid) {
+    dateFrom.classList.add("input-error");
+    dateTo.classList.add("input-error");
+    e.preventDefault(); // afbryd submit
+  }
 });
 
 // Bekræftelses-dialog funktion

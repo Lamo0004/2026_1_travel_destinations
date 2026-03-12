@@ -61,48 +61,28 @@ window.addEventListener("load", async () => {
         document.getElementById("destinationsContainer").appendChild(kopi);
     });
 });
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector("form");
+document.addEventListener("submit", (e) => {
+    const form = e.target;
     const dateFrom = form.querySelector('input[name="date_from"]');
     const dateTo = form.querySelector('input[name="date_to"]');
     if (!dateFrom || !dateTo)
         return;
-    // Tilføj en error-besked container
-    let errorContainer = document.createElement("div");
-    errorContainer.className = "error-message";
-    dateTo.parentNode?.appendChild(errorContainer);
-    form.addEventListener("submit", (e) => {
-        let valid = true;
-        errorContainer.textContent = "";
-        // Fjern tidligere fejlkoder
-        dateFrom.classList.remove("input-error");
-        dateTo.classList.remove("input-error");
-        if (!dateFrom.value) {
-            valid = false;
-            dateFrom.classList.add("input-error");
-        }
-        if (!dateTo.value) {
-            valid = false;
-            dateTo.classList.add("input-error");
-        }
-        // Ekstra check: start dato skal være før slut dato
-        if (dateFrom.value && dateTo.value) {
-            const fromDate = new Date(dateFrom.value);
-            const toDate = new Date(dateTo.value);
-            if (fromDate > toDate) {
-                valid = false;
-                dateFrom.classList.add("input-error");
-                dateTo.classList.add("input-error");
-                errorContainer.textContent = "Start date cannot be after end date.";
-            }
-        }
-        if (!valid) {
-            e.preventDefault(); // forhindrer submit
-            if (!errorContainer.textContent) {
-                errorContainer.textContent = "Both start and end dates are required.";
-            }
-        }
-    });
+    dateFrom.classList.remove("input-error");
+    dateTo.classList.remove("input-error");
+    const fromVal = dateFrom.value;
+    const toVal = dateTo.value;
+    let valid = true;
+    // check required
+    if (!fromVal || !toVal)
+        valid = false;
+    // check start < slut
+    if (fromVal && toVal && new Date(fromVal) > new Date(toVal))
+        valid = false;
+    if (!valid) {
+        dateFrom.classList.add("input-error");
+        dateTo.classList.add("input-error");
+        e.preventDefault(); // afbryd submit
+    }
 });
 // Bekræftelses-dialog funktion
 function showCustomConfirm(message) {

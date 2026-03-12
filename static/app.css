@@ -129,7 +129,6 @@ nav {
 
 label {
   display: flex;
-  gap: var(--space-md);
   span {
     color: var(--color-error);
     font-size: 0.7rem;
@@ -140,19 +139,20 @@ input,
 textarea {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 8px;
+  padding: var(--space-sm);
+  margin-bottom: var(--space-md);
 }
 
 .input-error {
-  border: 2px solid var(--color-error);
-  background-color: #ffe6e6;
+  background-color: rgba(230, 130, 130, 0.5);
 }
 
+/* 
 .error-message {
   color: var(--color-error);
   font-size: 0.7rem;
   margin-top: var(-space-xs);
-}
+} */
 
 .signup_box {
   margin-block: var(--space-xl);
@@ -196,8 +196,8 @@ textarea {
 
 .custom-confirm-content {
   background-color: white;
-  padding: var(--radius-lg);
-  border-radius: var(--radius-sm);
+  padding: var(--space-xl);
+  border-radius: var(--space-sm);
   text-align: center;
 }
 
@@ -207,6 +207,7 @@ textarea {
   color: white;
   border: none;
   padding: var(--space-sm) var(--space-md);
+  margin-top: var(--space-md);
   border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;

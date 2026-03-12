@@ -1,13 +1,15 @@
 <form mix-post="/api-create-user" autocomplete="off" novalidate>
     <div>
-        <label for="">First name <span>* {{x.USER_FIRST_NAME_MIN}} to {{x.USER_FIRST_NAME_MAX}}
+        <label for="">First name <span>* </span></label>
+        <label><span>{{x.USER_FIRST_NAME_MIN}} to {{x.USER_FIRST_NAME_MAX}}
                 characters</span></label>
         <input name="user_first_name" placeholder="user first name" type="text" value=""
             mix-validate="{{x.REGEX_USER_FIRST_NAME}}" required>
     </div>
 
     <div>
-        <label for="">Last name <span>* {{x.USER_LAST_NAME_MIN}} to {{x.USER_LAST_NAME_MAX}}
+        <label for="">Last name <span>*</span></label>
+        <label for=""><span>{{x.USER_LAST_NAME_MIN}} to {{x.USER_LAST_NAME_MAX}}
                 characters</span></label>
         <input name="user_last_name" placeholder="user last name" type="text" value=""
             mix-validate="{{x.REGEX_USER_LAST_NAME}}" required>
@@ -20,7 +22,8 @@
     </div>
 
     <div>
-        <label for="">Password <span>* {{x.USER_PASSWORD_MIN}} to {{x.USER_PASSWORD_MAX}}
+        <label for="">Password <span>*</span></label>
+        <label for=""><span>{{x.USER_PASSWORD_MIN}} to {{x.USER_PASSWORD_MAX}}
                 characters</span></label>
         <input name="user_password" placeholder="user password" type="password" value=""
             mix-validate="{{x.REGEX_USER_PASSWORD}}" required>

@@ -9,7 +9,8 @@
         </div>
 
         <div>
-            <label for="">Password <span>* {{x.USER_PASSWORD_MIN}} to {{x.USER_PASSWORD_MAX}}
+            <label for="">Password <span>*</span></label>
+            <label for=""><span>{{x.USER_PASSWORD_MIN}} to {{x.USER_PASSWORD_MAX}}
                     characters</span></label>
             <input name="user_password" placeholder="user password" type="password" value=""
                 mix-validate="{{x.REGEX_USER_PASSWORD}}" required>
