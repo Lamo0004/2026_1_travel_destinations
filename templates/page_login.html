@@ -1,18 +1,18 @@
 {% include "_header.html" %}
 
 <main>
-    <form mix-post="/api-login" autocomplete="off">
+    <form mix-post="/api-login" autocomplete="off" novalidate>
         <div>
-            <label for="">Email</label>
-            <input name="user_email" placeholder="user email" type="text" value=""
-                mix-validate="{{x.REGEX_USER_EMAIL}}">
+            <label for="">Email <span>*</span></label>
+            <input name="user_email" placeholder="user email" type="text" value="" mix-validate="{{x.REGEX_USER_EMAIL}}"
+                required>
         </div>
 
         <div>
-            <label for="">Password <span>{{x.USER_PASSWORD_MIN}} to {{x.USER_PASSWORD_MAX}}
+            <label for="">Password <span>* {{x.USER_PASSWORD_MIN}} to {{x.USER_PASSWORD_MAX}}
                     characters</span></label>
             <input name="user_password" placeholder="user password" type="password" value=""
-                mix-validate="{{x.REGEX_USER_PASSWORD}}">
+                mix-validate="{{x.REGEX_USER_PASSWORD}}" required>
         </div>
 
         <button class="btn-primary">Login</button>

@@ -22,18 +22,25 @@
 
     <nav>
         <div class="nav-container">
-            <a href="/">Home</a>
-            <a href="/destinations">Destinations</a>
+            <!-- request.path er URL-stien brugeren er på lige nu -->
+            <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+
+            <a href="/destinations" class="{% if request.path.startswith('/destinations') %}active{% endif %}">
+                Destinations
+            </a>
 
             {% if user %}
-            <a href="/profile">My profile</a>
+            <a href="/profile" class="{% if request.path.startswith('/profile') %}active{% endif %}">
+                My profile
+            </a>
             {% endif %}
 
             {% if not user %}
-            <a href="/login">Login</a>
+            <a href="/login" class="{% if request.path == '/login' %}active{% endif %}">
+                Login
+            </a>
             {% else %}
             <a href="/logout">Logout</a>
             {% endif %}
         </div>
-
     </nav>

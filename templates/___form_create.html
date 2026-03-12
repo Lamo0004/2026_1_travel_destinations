@@ -1,8 +1,8 @@
 <form {% if edit %} mix-patch="/api-update-destination/{{ destination.destination_pk }}" {% else %}
-    mix-post="/api-create-destination" {% endif %} autocomplete="off">
+    mix-post="/api-create-destination" {% endif %} autocomplete="off" novalidate>
 
     <div>
-        <label>Destination title * <span>{{x.DESTINATION_TITLE_MIN}} to {{x.DESTINATION_TITLE_MAX}}
+        <label>Destination title <span>* {{x.DESTINATION_TITLE_MIN}} to {{x.DESTINATION_TITLE_MAX}}
                 characters</span></label>
         <input name="title" placeholder="title" type="text" value="{{ destination.destination_title if edit }}"
             mix-validate="{{x.REGEX_DESTINATION_TITLE}}" required>
@@ -15,26 +15,27 @@
     </div>
 
     <div>
-        <label>Country * <span>{{x.DESTINATION_COUNTRY_MIN}} to {{x.DESTINATION_COUNTRY_MAX}}
+        <label>Country <span>* {{x.DESTINATION_COUNTRY_MIN}} to {{x.DESTINATION_COUNTRY_MAX}}
                 characters</span></label>
         <input name="country" placeholder="country" type="text" value="{{ destination.destination_country if edit }}"
             mix-validate="{{x.REGEX_DESTINATION_COUNTRY}}" required>
     </div>
 
     <div>
-        <label>Location</label>
-        <input name="location" placeholder="location" type="text"
-            value="{{ destination.destination_location if edit }}">
+        <label>Location <span>* {{x.DESTINATION_LOCATION_MIN}} to {{x.DESTINATION_LOCATION_MAX}}
+                characters</span></label>
+        <input name="location" placeholder="location" type="text" value="{{ destination.destination_location if edit }}"
+            mix-validate="{{x.REGEX_DESTINATION_LOCATION}}" required>
     </div>
 
     <div>
-        <label>Date from</label>
+        <label>Date from <span>*</span></label>
         <input name="date_from" type="date"
             value="{% if edit %}{{ destination.destination_date_from | int | timestamp_to_date }}{% endif %}" required>
     </div>
 
     <div>
-        <label>Date to</label>
+        <label>Date to <span>*</span></label>
         <input name="date_to" type="date"
             value="{% if edit %}{{ destination.destination_date_to | int | timestamp_to_date }}{% endif %}" required>
     </div>

@@ -100,6 +100,17 @@ def validate_destination_country():
     return destination_country
 
 
+################ Validation location ################ 
+DESTINATION_LOCATION_MIN = 2
+DESTINATION_LOCATION_MAX = 50
+REGEX_DESTINATION_LOCATION = f"^.{{{DESTINATION_LOCATION_MIN},{DESTINATION_LOCATION_MAX}}}$"
+def validate_destination_location():
+    destination_location = request.form.get("location", "").strip()
+    if not re.match(REGEX_DESTINATION_LOCATION, destination_location):
+        raise Exception("company_exception destination_location")
+    return destination_location
+
+
 ################ Validation start and end dates ################ 
 DATE_FROM_KEY = "date_from"
 DATE_TO_KEY = "date_to"

@@ -314,7 +314,7 @@ def api_create_destination():
         destination_title = x.validate_destination_title()
         destination_description = request.form.get("description", "").strip()
         destination_country = x.validate_destination_country()
-        destination_location = request.form.get("location", "").strip()
+        destination_location = x.validate_destination_location()
         date_from_str = request.form.get("date_from", "").strip()
         date_to_str = request.form.get("date_to", "").strip()
         destination_date_from, destination_date_to = x.validate_destination_dates(date_from_str, date_to_str)
@@ -366,6 +366,11 @@ def api_create_destination():
         
         if "company_exception destination_country" in str(ex):
             error_message = f"Country must be {x.DESTINATION_COUNTRY_MIN} to {x.DESTINATION_COUNTRY_MAX} characters"
+            ___tip = render_template("___tip.html", status="error",  message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+        
+        if "company_exception destination_location" in str(ex):
+            error_message = f"Destination location must be {x.DESTINATION_LOCATION_MIN} to {x.DESTINATION_LOCATION_MAX} characters"
             ___tip = render_template("___tip.html", status="error",  message=error_message)
             return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
         
@@ -473,10 +478,10 @@ def api_update_destination(destination_pk):
 
         # Henter data fra formular
         # Validering
-        destination_title = x.validate_destination_title()  # hent fra form
-        destination_country = x.validate_destination_country()  # hent fra form
+        destination_title = x.validate_destination_title()  
+        destination_country = x.validate_destination_country()  
         destination_description = request.form.get("description", "").strip()
-        destination_location = request.form.get("location", "").strip()
+        destination_location = x.validate_destination_location()
         destination_date_from, destination_date_to = x.validate_destination_dates(
             request.form.get("date_from", "").strip(),
             request.form.get("date_to", "").strip()
@@ -525,6 +530,11 @@ def api_update_destination(destination_pk):
         if "company_exception destination_country" in str(ex):
             error_message = f"Country must be {x.DESTINATION_COUNTRY_MIN} to {x.DESTINATION_COUNTRY_MAX} characters"
             ___tip = render_template("___tip.html", status="error", message=error_message)
+            return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
+
+        if "company_exception destination_location" in str(ex):
+            error_message = f"Destination location must be {x.DESTINATION_LOCATION_MIN} to {x.DESTINATION_LOCATION_MAX} characters"
+            ___tip = render_template("___tip.html", status="error",  message=error_message)
             return f"""<browser mix-after-begin="#tooltip">{___tip}</browser>""", 400
 
         if "company_exception date_missing" in str(ex):
