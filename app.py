@@ -19,7 +19,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 
-############################## 
+##############################  ?????????????????????????
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -41,7 +41,7 @@ def timestamp_to_date(ts):
 def show_signup():
     try:
         user = session.get("user", "")
-        return render_template("page_signup.html", user=user, x=x)
+        return render_template("page_signup.html", user=user, x=x, title="Signup")
     except Exception as ex:
         ic(ex)
         return "ups"
@@ -117,7 +117,7 @@ def api_create_user():
 def show_login():
     try:
         user = session.get("user", "")
-        if not user: return render_template("page_login.html", user=user, x=x)
+        if not user: return render_template("page_login.html", user=user, x=x, title="Login")
         return redirect("/profile")
     except Exception as ex:
         ic(ex)
@@ -181,7 +181,7 @@ def show_profile():
     try:
         user = session.get("user", "")
         if not user: return redirect("/login")
-        return render_template("page_profile.html", user=user, x=x)
+        return render_template("page_profile.html", user=user, x=x, title="My profile")
     except Exception as ex:
         ic(ex)
         return "ups"
@@ -236,7 +236,7 @@ def logout():
 def show_home():
     try:
         user = session.get("user", "")
-        return render_template("page_home.html", user=user, x=x)
+        return render_template("page_home.html", user=user, x=x, title="Home")
     except Exception as ex:
         ic(ex)
         return "ups"
@@ -247,7 +247,7 @@ def show_home():
 def show_destinations():
     try:
         user = session.get("user", "")
-        return render_template("page_destinations.html", user=user)
+        return render_template("page_destinations.html", user=user, title="Destinations")
     except Exception as ex:
         ic(ex)
         return "ups" 
@@ -299,7 +299,7 @@ def api_get_destinations():
 def show_create_destination():
     try:
         user = session.get("user", "")
-        return render_template("page_create.html", x=x, user=user,)
+        return render_template("page_create.html", x=x, user=user, title="Create destination")
     except Exception as ex:
         ic(ex)
         return "ups"
@@ -441,7 +441,7 @@ def show_edit_destination(destination_pk):
             return "Destination not found", 400
 
         user = session.get("user", "")
-        return render_template("page_create.html", destination=destination, edit=True, x=x, user=user)
+        return render_template("page_create.html", destination=destination, edit=True, x=x, user=user, title="Edit destination")
         # return '<browser mix-redirect="/destinations"></browser>' #SLETTE???!!
 
     except Exception as ex: 
