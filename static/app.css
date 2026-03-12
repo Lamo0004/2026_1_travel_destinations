@@ -71,12 +71,16 @@ h3 {
   margin-bottom: var(--space-sm);
 }
 
+p {
+  max-width: 70ch;
+}
+
 a {
   text-decoration: none;
 }
 
 nav {
-  background: var(--color-surface); /* headerens baggrund fylder hele bredden */
+  background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   height: 3rem;
   display: flex;
@@ -84,13 +88,13 @@ nav {
 }
 
 .nav-container {
-  max-width: var(--container-width); /* samme som main */
-  margin: 0 auto; /* centrerer containeren */
+  max-width: var(--container-width);
+  margin: 0 auto;
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--space-lg); /* lidt padding i siderne */
+  padding: 0 var(--space-lg);
 }
 
 .nav-container a {
@@ -109,7 +113,8 @@ nav {
   padding: 10px 18px;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .btn-primary:hover {

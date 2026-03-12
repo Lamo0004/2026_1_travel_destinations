@@ -29,14 +29,6 @@ def login_required(f):
     return decorated_function
 
 
-############################## Tjekker log ind
-# def require_login():
-#     user = session.get("user")
-#     if not user:
-#         raise Exception("not_logged_in")
-#     return user
-
-
 ############################## 
 @app.template_filter('timestamp_to_date')
 def timestamp_to_date(ts):
@@ -398,50 +390,19 @@ def api_create_destination():
 
 
 ##############################
-# @app.delete("/api/destinations/<destination_pk>")
-# @login_required
-# def delete_destination(destination_pk):
-#     try:
-#         db, cursor = x.db()
-
-#         user = session.get("user") # hent ejer
-#         user_pk = user["user_pk"] # gem ejer
-        
-#         # Henter destination og tjek ejerskab
-#         q = "SELECT user_pk FROM destinations WHERE destination_pk = %s"
-#         cursor.execute(q, (destination_pk,))
-#         destination = cursor.fetchone()
-#         if not destination:
-#             return "Destination not found", 404
-#         if destination["user_pk"] != user_pk:
-#             return "Unauthorized", 400
-
-#         # Sletter destination
-#         q = "DELETE FROM destinations WHERE destination_pk = %s"
-#         cursor.execute(q, (destination_pk,))
-#         db.commit()  
-
-#         return "", 204
-
-#     except Exception as ex:
-#         ic(ex)
-#         return "System error", 500
-
-#     finally:
-#         if "cursor" in locals(): cursor.close()
-#         if "db" in locals(): db.close()
 @app.delete("/api/destinations/<destination_pk>")
 @login_required
 def delete_destination(destination_pk):
     try:
-        user = session.get("user")
+        user = session.get("user") # hent ejer
+        #Forstår ikke lige hvorfor det her skal være der for at virke....
         if not user:
             return "Unauthorized", 403
-        user_pk = user["user_pk"]
+        user_pk = user["user_pk"] # gem ejer
 
         db, cursor = x.db()
 
-        # Hent destination og tjek ejerskab
+        # Henter destination og tjek ejerskab
         q = "SELECT user_pk FROM destinations WHERE destination_pk = %s"
         cursor.execute(q, (destination_pk,))
         destination = cursor.fetchone()
@@ -450,7 +411,7 @@ def delete_destination(destination_pk):
         if destination["user_pk"] != user_pk:
             return "Unauthorized", 403
 
-        # Slet destination
+        # Sletter destination
         q_delete = "DELETE FROM destinations WHERE destination_pk = %s"
         cursor.execute(q_delete, (destination_pk,))
         db.commit()
@@ -481,8 +442,9 @@ def show_edit_destination(destination_pk):
 
         user = session.get("user", "")
         return render_template("page_create.html", destination=destination, edit=True, x=x, user=user)
-        return '<browser mix-redirect="/destinations"></browser>'
-    except Exception as ex:
+        # return '<browser mix-redirect="/destinations"></browser>' #SLETTE???!!
+
+    except Exception as ex: 
         ic(ex)
         return "System error", 500
     finally:
@@ -491,7 +453,7 @@ def show_edit_destination(destination_pk):
 
 
 ##############################
-@app.post("/api-update-destination/<destination_pk>")
+@app.patch("/api-update-destination/<destination_pk>")
 @login_required
 def api_update_destination(destination_pk):
     try:

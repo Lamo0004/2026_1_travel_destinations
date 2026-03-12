@@ -1,6 +1,5 @@
-<form
-    mix-post="{% if edit %}/api-update-destination/{{ destination.destination_pk }}{% else %}/api-create-destination{% endif %}"
-    autocomplete="off">
+<form {% if edit %} mix-patch="/api-update-destination/{{ destination.destination_pk }}" {% else %}
+    mix-post="/api-create-destination" {% endif %} autocomplete="off">
 
     <div>
         <label>Destination title * <span>{{x.DESTINATION_TITLE_MIN}} to {{x.DESTINATION_TITLE_MAX}}
