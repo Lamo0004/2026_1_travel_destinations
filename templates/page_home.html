@@ -2,7 +2,7 @@
 
 <main>
     <h1>TRAVEL DESTINATIONS</h1>
-    <h2>Velkommen tilbage {{ user.user_first_name }}</h2>
+    <h2>Velkommen {% if user %} tilbage {{ user.user_first_name }} {% endif %}</h2>
     <p>Here you can collect, organize and share your travels - both those you have already experienced and those you
         dream of. Create your destinations and get a comprehensive overview of your adventures around the world. Or get
         inspiration from others.
